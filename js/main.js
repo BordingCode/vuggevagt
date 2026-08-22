@@ -11,6 +11,7 @@ import { Signal, iceServers, API_URL } from './signal.js';
 import { Peer } from './peer.js';
 import { Meter, NoiseGate, sensToDb, dbToBar } from './meter.js';
 import * as Alarm from './alarm.js';
+import { Battery, batteryText, batteryWarning } from './battery.js';
 
 const $ = (s) => document.querySelector(s);
 const on = (sel, ev, fn) => $(sel).addEventListener(ev, fn);
@@ -31,6 +32,13 @@ let driftTimer = null;
 let panelTimer = null;
 let repairTimer = null;
 let deadReason = null;   // 'link' heals by itself; 'blind' must not
+let battery = null;
+let saver = false;       // unplugged: spend as little as possible on the screen
+let lastLvlSent = 0;
+let lastPaint = 0;
+let lvlPeak = -90;
+let babyBat = null;      // the parent's copy of the baby phone's battery
+let batWarned = null;
 let lastLevelDb = -90;
 let linkDead = false;
 let alertActive = false;
@@ -200,15 +208,45 @@ async function startBaby() {
   await meter.start(micStream);
   meter.addEventListener('level', ({ detail }) => {
     lastLevelDb = detail.db;
-    paintBar('#baby-fill', detail.db);
-    paintBar('#baby-mini-fill', detail.db);
-    if (peer) peer.post({ t: 'lvl', v: Math.round(detail.db) });
+    if (detail.db > lvlPeak) lvlPeak = detail.db;
+
+    // Only paint what is actually on screen. On the dark night screen the panel
+    // is hidden, so painting its bars is pure battery burnt for nobody.
+    const panelOpen = document.body.classList.contains('panel-open');
+    if (panelOpen) paintBar('#baby-fill', detail.db);
+    const now = Date.now();
+    const paintEvery = saver ? 1000 : 200;
+    if (now - lastPaint >= paintEvery) { paintBar('#baby-mini-fill', lvlPeak); lastPaint = now; }
+
+    // Send the PEAK since the last message, never the latest sample: throttling
+    // to save radio must not let a short cry slip through between packets.
+    const sendEvery = saver ? 500 : 200;
+    if (peer && now - lastLvlSent >= sendEvery) {
+      peer.post({ t: 'lvl', v: Math.round(lvlPeak) });
+      lastLvlSent = now;
+      lvlPeak = -90;
+    }
   });
 
   await connect();
   await acquireWakeLock();
   startDrift();
   startStats('#baby-stats');
+
+  // A phone in a pram is not on a charger, and then the screen we are forced to
+  // keep on is the whole budget. Measure it, say it out loud, and spend less.
+  battery = new Battery();
+  // listen BEFORE starting: the first reading is emitted during start()
+  battery.addEventListener('change', ({ detail }) => {
+    setSaver(!detail.charging);
+    const line = $('#baby-battery');
+    if (line) line.textContent = batteryText(detail);
+    if (peer) peer.post({ t: 'bat', b: detail });
+  });
+  if (!(await battery.start())) {
+    const line = $('#baby-battery');
+    if (line) line.textContent = 'Batteristatus kan ikke aflæses i denne browser — hold selv øje med strømmen.';
+  }
 }
 
 // Keeping the screen awake is the whole reason the baby phone works at all.
@@ -220,6 +258,20 @@ async function acquireWakeLock() {
     babyWarn(null);
   } catch (e) {
     babyWarn('Kunne ikke holde skærmen tændt. Sæt skærmtimeout til "aldrig" i telefonens indstillinger.');
+  }
+}
+
+// Off the charger every repaint counts, so the night screen stops breathing
+// and the little meter updates once a second instead of ten times.
+function setSaver(on) {
+  if (saver === on) return;
+  saver = on;
+  document.body.classList.toggle('saver', on);
+  const note = $('#baby-note');
+  if (note) {
+    note.textContent = on
+      ? 'Ikke i opladning — skærmen skal blive tændt for at mikrofonen virker, så batteriet løber ud. Se hvor lang tid der er tilbage nedenfor.'
+      : 'Skærmen skal blive tændt, ellers lukker Android for mikrofonen.';
   }
 }
 
@@ -314,6 +366,25 @@ function onLevel(db) {
   else if (edge === 'fall') clearAlert(false);
 }
 
+// The baby phone's battery is the parent phone's problem: when it dies, the
+// monitoring stops. Warn well before that, not after.
+function onBabyBattery(b) {
+  babyBat = b;
+  const el = $('#baby-battery-line');
+  if (el) {
+    el.textContent = b.pct == null ? '' : `Barnets telefon: ${batteryText(b)}`;
+    el.hidden = b.pct == null;
+    el.classList.toggle('warn', !b.charging && b.pct != null && b.pct <= 20);
+  }
+  const w = batteryWarning(b);
+  if (!w) { batWarned = null; return; }
+  if (batWarned === w.level) return;      // say each step once, not every minute
+  batWarned = w.level;
+  toast(w.text, 6000);
+  Alarm.notify('Vuggevagt', w.text);
+  if (w.level === 'critical') { Alarm.wake(); Alarm.buzz([300, 150, 300]); }
+}
+
 function raiseAlert() {
   if (alertActive) return;
   alertActive = true;
@@ -359,6 +430,7 @@ async function connect() {
 
   peer.addEventListener('ctl', ({ detail }) => {
     if (detail.t === 'lvl' && S.role === 'parent') onLevel(detail.v);
+    if (detail.t === 'bat' && S.role === 'parent') onBabyBattery(detail.b);
     if (detail.t === 'blind') babyWentBlind(detail.on);
     if (detail.t === 'talk' && S.role === 'baby') halfDuplex(detail.on);
     if (detail.t === 'bye') markDead('Den anden telefon blev stoppet');
@@ -474,6 +546,9 @@ function onLinkUp() {
   if (linkDead && deadReason !== 'blind') clearDead();
   if (linkDead) return;   // still deaf: never paint a healthy status over an alarm
   setPill(S.role === 'parent' ? 'Lytter' : 'Forbundet', 'ok');
+  // The battery only emits when it changes, which can be many minutes away.
+  // Tell the parent where we stand the moment there is a link to tell it over.
+  if (S.role === 'baby' && battery && peer) peer.post({ t: 'bat', b: battery.snapshot() });
   babyWarn(null);
   // The parent phone drops the signalling socket once the phones can talk
   // directly — every open socket is a radio wake-up all night long. The baby
@@ -668,6 +743,8 @@ window.__vv = {
   get signal() { return signal; },
   stats: () => (peer ? peer.stats() : null),
   level: (db) => onLevel(db),
+  saver: (on) => setSaver(on),          // pretend the charger was pulled out
+  battery: () => (battery ? battery.snapshot() : null),
   fakeNoise(db = -20, ms = 2000) {   // pretend the room got loud
     const t0 = Date.now();
     const iv = setInterval(() => {

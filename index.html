@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="stylesheet" href="css/main.css?v=1">
+<link rel="stylesheet" href="css/main.css?v=3">
 </head>
 <body>
 <div id="app">
@@ -76,6 +76,7 @@
       <div class="status-line"><span class="pill" id="baby-pill">Starter…</span></div>
       <div class="meter big"><i id="baby-fill"></i><u id="baby-thresh"></u></div>
       <p class="note" id="baby-note">Skærmen skal blive tændt, ellers lukker Android for mikrofonen.</p>
+      <p class="battery" id="baby-battery"></p>
       <p class="warn" id="baby-warn" hidden></p>
       <div class="row">
         <button class="btn" id="baby-stop">Stop</button>
@@ -124,6 +125,7 @@
         <span>Stille indtil barnet gør lyd</span>
       </label>
     </div>
+    <p class="battery" id="baby-battery-line" hidden></p>
     <p class="tiny" id="parent-stats"></p>
     <button class="link-btn" id="parent-stop">Stop</button>
   </section>
@@ -150,6 +152,7 @@
       <p><b>Lyden går direkte mellem de to telefoner</b> og er krypteret hele vejen. Serveren hjælper kun telefonerne med at finde hinanden — den kan hverken høre eller gemme noget.</p>
       <p><b>Telefonen ved barnet skal have skærmen tændt</b> og være sat til strøm. Sådan er Android skruet sammen: en browser i baggrunden mister adgang til mikrofonen. Skærmen bliver helt sort, så den ikke lyser i sengen.</p>
       <p><b>Din egen telefon må gerne have skærmen slukket</b> og ligge i lommen. Den opfører sig som en musikafspiller, og det bruger kun lidt strøm.</p>
+      <p><b>Barnevogn uden strøm?</b> Det går fint til en lur, men ikke til en hel nat. Så snart telefonen ikke oplader, skruer appen ned for sig selv og viser hvor mange procent den bruger i timen — og hvor lang tid der er tilbage. Din telefon siger til ved 20 % og igen ved 10 %, så du når at gøre noget. Slå <b>automatisk lysstyrke fra</b> og skru helt ned: i sollys skruer telefonen selv op, og så æder skærmen batteriet.</p>
       <p><b>Hvis forbindelsen dør, hyler din telefon.</b> Det er med vilje. En babyalarm, der bliver stille uden at sige det, er farligere end ingen babyalarm.</p>
       <p class="warn-txt">Vuggevagt er et hjemmelavet hjælpemiddel — ikke medicinsk udstyr. Brug den som et ekstra øre, ikke som en garanti.</p>
     </div>
@@ -160,7 +163,7 @@
   <audio id="remote-audio" playsinline autoplay></audio>
   <audio id="baby-audio" playsinline autoplay></audio>
 </div>
-<script type="module" src="js/main.js?v=8"></script>
+<script type="module" src="js/main.js?v=12"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));

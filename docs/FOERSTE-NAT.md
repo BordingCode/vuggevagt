@@ -40,6 +40,28 @@ Stå ved barnet og se på den store bjælke på din telefon.
 - Driller den med falske alarmer: skru følsomheden ned, eller sæt tiden i
   ⚙ op, så lyden skal vare længere før alarmen går.
 
+## Hvis telefonen ikke kan komme i opladeren (barnevogn)
+Skærmen skal være tændt, ellers lukker Android for mikrofonen — så uden
+oplader er det batteriet, der bestemmer hvor længe vagten holder.
+
+- Appen opdager selv at den ikke oplader, og **skruer ned for sig selv**:
+  prikken holder op med at ånde, og den sender sjældnere.
+- Nederst på barnets telefon står der **hvor mange procent den bruger i timen
+  og hvor lang tid der er tilbage** — målt på netop den telefon, ikke et gæt.
+  Det samme står på din egen telefon.
+- Du får besked ved **20 %** og igen ved **10 %**, og hvis den pludselig
+  dræner så hurtigt at der er under en halv time igen.
+- **Slå automatisk lysstyrke fra og skru helt ned.** I sollys skruer telefonen
+  selv op på fuld styrke, og så forsvinder batteriet meget hurtigere.
+- Slå telefonens egen batterisparefunktion til på barnets telefon.
+- Vær ekstra opmærksom på **flytilstand/mobildata**: udenfor hjemmets wifi
+  skal TURN-relæet være tændt (se README), ellers kan de to telefoner ikke
+  altid finde hinanden på mobilnet.
+
+Tommelfingerregel: **en lur i barnevognen er fint. En hel nat uden strøm er
+det ikke.** Kig på tallet appen viser, første gang du prøver — så ved du
+præcis hvad din telefon kan holde til.
+
 ## Prøv de tre fejl, inden du stoler på den
 Det er dem der afgør, om alarmen er noget værd.
 

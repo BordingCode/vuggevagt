@@ -1,11 +1,11 @@
 // Vuggevagt service worker. Cache-first for our own files so the app opens
 // instantly and keeps working if the Wi-Fi hiccups; the signalling server is
 // never cached.
-const CACHE = 'vuggevagt-v8';
+const CACHE = 'vuggevagt-v13';
 const ASSETS = [
   '.', 'index.html', 'manifest.json',
-  'css/main.css?v=1',
-  'js/main.js?v=8', 'js/store.js', 'js/signal.js', 'js/peer.js', 'js/meter.js', 'js/alarm.js',
+  'css/main.css?v=3',
+  'js/main.js?v=12', 'js/store.js', 'js/battery.js', 'js/signal.js', 'js/peer.js', 'js/meter.js', 'js/alarm.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable.png',
 ];
 

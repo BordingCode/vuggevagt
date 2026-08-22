@@ -304,3 +304,16 @@ audio { display: none; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ---------- battery ---------- */
+.battery {
+  font-size: 13px;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+.battery.warn { color: var(--warn); font-weight: 600; }
+
+/* Off the charger: stop the breathing dot. An opacity animation is cheap, but
+   "cheap, all night, on a battery we cannot recharge" is still not free. */
+body.saver .dot { animation: none; opacity: 0.5; }

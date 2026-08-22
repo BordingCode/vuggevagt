@@ -18,6 +18,15 @@ hverken høre eller gemme noget.
 - **Hvis forbindelsen dør, hyler din telefon** — og den holder ikke op af sig
   selv. En babyalarm der bliver stille uden at sige det, er værre end ingen.
 
+## Uden oplader (barnevogn)
+Skærmen skal stadig være tændt, så batteriet er begrænsningen. `js/battery.js`
+måler det **faktiske** forbrug på den telefon (Battery Status API) og viser
+`%/time` + `ca. X t tilbage` begge steder. Når telefonen ikke oplader, slår
+appen selv en sparetilstand til: prikken holder op med at ånde, niveaubjælken
+tegnes 1× i sekundet i stedet for 10×, og niveauet sendes hvert 500 ms i stedet
+for hvert 200 ms — men altid som **peak siden sidst**, så en kort gråd aldrig
+kan falde ned mellem to pakker. Forældretelefonen advarer ved 20 % og 10 %.
+
 ## Sådan hænger det sammen
 ```
 barnets telefon  ──── lyd, krypteret, direkte ────  din telefon

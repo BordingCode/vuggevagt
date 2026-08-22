@@ -26,7 +26,16 @@ fejler stille er farligere end ingen babyalarm. Derfor:
   af at netværket kommer sig — kun barnets telefon selv kan melde den er tilbage.
 - `onLinkUp()` må aldrig male en rask status hen over en aktiv alarm.
 
+## Uden oplader
+`js/battery.js` måler faktisk forbrug og resttid; `setSaver()` slår sparetilstand
+til automatisk når telefonen ikke oplader. Vigtig regel: når niveau-rapporterne
+throttles, skal der sendes **peak siden sidste pakke**, aldrig seneste sample —
+ellers kan en kort gråd falde ned mellem to pakker. Batteri-snapshot sendes både
+ved ændring, hvert 60. sekund og ved `onLinkUp()` (det emitter ellers først ved
+næste ændring, som kan være mange minutter væk).
+
 ## Fælder vi allerede er faldet i
+- **Lyt FØR du starter `Battery`** — første måling emittes inde i `start()`.
 - **`AudioContext.resume()` returnerer et løfte der ALDRIG resolver** uden et
   brugertryk. Await det aldrig i opstartsstien — `Alarm.unlock()` har derfor et
   400ms race, og `armOnFirstGesture()` prøver igen ved første tryk.
