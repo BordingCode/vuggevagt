@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Vuggevagt — babyalarm mellem to telefoner</title>
+<meta name="description" content="Babyalarm: en telefon ved barnet, en hos dig. Lyden går direkte mellem telefonerne, krypteret hele vejen.">
+<meta name="theme-color" content="#0d1117">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="css/main.css?v=1">
+</head>
+<body>
+<div id="app">
+
+  <!-- ---------- vælg rolle ---------- -->
+  <section id="scr-welcome" class="screen">
+    <div class="brand">
+      <div class="brand-mark">☾</div>
+      <h1>Vuggevagt</h1>
+      <p class="tagline">To telefoner. Én sover, én lytter.</p>
+    </div>
+    <h2 class="q">Hvilken telefon er det her?</h2>
+    <div class="pick">
+      <button class="big-card" id="pick-baby">
+        <span class="big-emoji">👶</span>
+        <span class="big-title">Ved barnet</span>
+        <span class="big-sub">Den her bliver stående ved sengen og lytter. <b>Skal sættes til strøm.</b></span>
+      </button>
+      <button class="big-card" id="pick-parent">
+        <span class="big-emoji">🎧</span>
+        <span class="big-title">Hos mig</span>
+        <span class="big-sub">Den her har du i lommen. Den siger til, når barnet gør lyd.</span>
+      </button>
+    </div>
+    <button class="link-btn" id="go-help">Hvordan virker det?</button>
+  </section>
+
+  <!-- ---------- parring: barnets telefon ---------- -->
+  <section id="scr-pair-baby" class="screen">
+    <h2>Forbind de to telefoner</h2>
+    <p class="sub">Åbn Vuggevagt på <b>din egen</b> telefon og indtast koden her — eller send linket til dig selv.</p>
+    <div class="code-box" id="code-show">––––-––––</div>
+    <div class="row">
+      <button class="btn" id="btn-share">Send link</button>
+      <button class="btn" id="btn-copy">Kopiér kode</button>
+    </div>
+    <p class="note" id="pair-status">Venter på din telefon…</p>
+    <button class="btn btn-primary" id="btn-start-baby">Start overvågning</button>
+    <button class="link-btn" id="baby-back">Tilbage</button>
+  </section>
+
+  <!-- ---------- parring: forældrenes telefon ---------- -->
+  <section id="scr-pair-parent" class="screen">
+    <h2>Indtast koden</h2>
+    <p class="sub">Koden står på telefonen ved barnet.</p>
+    <input id="code-input" class="code-input" inputmode="text" autocapitalize="characters"
+           autocomplete="off" spellcheck="false" maxlength="9" placeholder="ABCD-2345">
+    <p class="note" id="join-status"></p>
+    <button class="btn btn-primary" id="btn-join">Forbind</button>
+    <button class="link-btn" id="parent-back">Tilbage</button>
+  </section>
+
+  <!-- ---------- barnets telefon: natskærm ---------- -->
+  <section id="scr-baby" class="screen night">
+    <div id="baby-dark" class="dark-layer">
+      <div id="baby-drift" class="drift">
+        <div class="dot" id="baby-dot"></div>
+        <div class="mini-meter"><i id="baby-mini-fill"></i></div>
+      </div>
+    </div>
+    <div id="baby-panel" class="panel">
+      <div class="status-line"><span class="pill" id="baby-pill">Starter…</span></div>
+      <div class="meter big"><i id="baby-fill"></i><u id="baby-thresh"></u></div>
+      <p class="note" id="baby-note">Skærmen skal blive tændt, ellers lukker Android for mikrofonen.</p>
+      <p class="warn" id="baby-warn" hidden></p>
+      <div class="row">
+        <button class="btn" id="baby-stop">Stop</button>
+        <button class="btn" id="baby-reset">Glem parring</button>
+      </div>
+      <p class="tiny" id="baby-stats"></p>
+    </div>
+  </section>
+
+  <!-- ---------- forældrenes telefon ---------- -->
+  <section id="scr-parent" class="screen">
+    <div class="status-head">
+      <span class="pill" id="parent-pill">Forbinder…</span>
+      <button class="icon-btn" id="parent-settings" aria-label="Indstillinger">⚙</button>
+    </div>
+
+    <div class="listen">
+      <div class="meter huge"><i id="parent-fill"></i><u id="parent-thresh"></u></div>
+      <p class="level-label" id="parent-level">–</p>
+    </div>
+
+    <p id="audio-hint" class="warn" hidden>⚠ Tryk én gang på skærmen — browseren må først lave lyd efter et tryk, og uden det er alarmen stum.</p>
+
+    <div id="alert-banner" class="alert-banner" hidden>
+      <b id="alert-title">Barnet gør lyd</b>
+      <span id="alert-sub"></span>
+      <button class="btn btn-small" id="alert-dismiss">OK</button>
+    </div>
+
+    <button class="talk-btn" id="talk-btn">
+      <span class="talk-icon">🎙</span>
+      <span>Hold nede for at tale</span>
+    </button>
+
+    <div class="controls">
+      <label class="ctl">
+        <span>Lydstyrke</span>
+        <input type="range" id="volume" min="0" max="100" value="85">
+      </label>
+      <label class="ctl">
+        <span>Følsomhed <small id="sens-val"></small></span>
+        <input type="range" id="sens" min="0" max="100" value="42">
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="vox">
+        <span>Stille indtil barnet gør lyd</span>
+      </label>
+    </div>
+    <p class="tiny" id="parent-stats"></p>
+    <button class="link-btn" id="parent-stop">Stop</button>
+  </section>
+
+  <!-- ---------- indstillinger ---------- -->
+  <section id="scr-settings" class="screen">
+    <h2>Indstillinger</h2>
+    <label class="ctl">
+      <span>Lyden skal vare <b id="hold-val">1,5</b> sekunder før alarmen går</span>
+      <input type="range" id="hold" min="0" max="10" step="1" value="3">
+    </label>
+    <button class="btn" id="btn-notify">Tillad notifikationer</button>
+    <p class="note">Notifikationer er en ekstra kanal oven i lyden — de virker kun så længe appen stadig kører.</p>
+    <button class="btn" id="btn-test-alarm">Test alarmen</button>
+    <p class="note">Prøv den én gang med skærmen slukket, så du ved hvordan den lyder klokken tre om natten.</p>
+    <button class="btn danger" id="btn-unpair">Glem parring</button>
+    <button class="link-btn" id="settings-back">Tilbage</button>
+  </section>
+
+  <!-- ---------- hjælp ---------- -->
+  <section id="scr-help" class="screen">
+    <h2>Sådan virker det</h2>
+    <div class="help">
+      <p><b>Lyden går direkte mellem de to telefoner</b> og er krypteret hele vejen. Serveren hjælper kun telefonerne med at finde hinanden — den kan hverken høre eller gemme noget.</p>
+      <p><b>Telefonen ved barnet skal have skærmen tændt</b> og være sat til strøm. Sådan er Android skruet sammen: en browser i baggrunden mister adgang til mikrofonen. Skærmen bliver helt sort, så den ikke lyser i sengen.</p>
+      <p><b>Din egen telefon må gerne have skærmen slukket</b> og ligge i lommen. Den opfører sig som en musikafspiller, og det bruger kun lidt strøm.</p>
+      <p><b>Hvis forbindelsen dør, hyler din telefon.</b> Det er med vilje. En babyalarm, der bliver stille uden at sige det, er farligere end ingen babyalarm.</p>
+      <p class="warn-txt">Vuggevagt er et hjemmelavet hjælpemiddel — ikke medicinsk udstyr. Brug den som et ekstra øre, ikke som en garanti.</p>
+    </div>
+    <button class="link-btn" id="help-back">Tilbage</button>
+  </section>
+
+  <div id="toast"></div>
+  <audio id="remote-audio" playsinline autoplay></audio>
+  <audio id="baby-audio" playsinline autoplay></audio>
+</div>
+<script type="module" src="js/main.js?v=8"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
+<script>(function(){try{var A="vuggevagt",K="hubdev",d=localStorage.getItem(K);if(!d){d=(self.crypto&&crypto.randomUUID?crypto.randomUUID():Date.now()+"."+Math.random().toString(36).slice(2));localStorage.setItem(K,d);}var u="https://hub-stats.mathiasjob.workers.dev/hit",b=JSON.stringify({app:A,d:d});if(navigator.sendBeacon){navigator.sendBeacon(u,b);}else{fetch(u,{method:"POST",body:b,keepalive:true,mode:"no-cors"});}}catch(e){}})();</script>
+</body>
+</html>
