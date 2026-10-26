@@ -1,3 +1,8 @@
+> **Flyttet ind i Lull (oktober 2026).** Babyalarmen ligger nu under Nat-fanen i
+> [Lull](https://bordingcode.github.io/lull/) (BordingCode/lull, `js/monitor.js`). Signal-serveren
+> `vuggevagt-signal` kører videre og bruges af Lull; dens kode ligger også i `lull/monitor-worker/`.
+> Siden her viderestiller bare til Lull.
+
 # Vuggevagt
 
 Babyalarm mellem to Android-telefoner. Én står ved barnet og lytter, én er hos

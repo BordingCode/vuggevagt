@@ -1,3 +1,6 @@
+# ⚠ PENSIONERET — babyalarmen er flyttet ind i Lull (`~/cc/lull`, se dens CLAUDE.md).
+Ikke byg videre her. `worker/` er stadig den kørende signal-server for Lull.
+
 # Vuggevagt — projektguide
 
 Babyalarm-PWA mellem to Android-telefoner. Vanilla ES-moduler, **intet
